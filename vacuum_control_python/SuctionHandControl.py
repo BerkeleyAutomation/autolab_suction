@@ -21,8 +21,8 @@ class VacuumHand:
 
 		# Capping angle inputs
 		try:
-			if targetAngle > 90:
-				targetAngle = 90
+			if targetAngle > 84:
+				targetAngle = 84
 			elif targetAngle < -90:
 				targetAngle = -90
 			serialConnection.write(str(targetAngle).encode())
