@@ -1,32 +1,32 @@
-# Python-Bluetooth Interface for the Vacuum Hand Project
-# AUTOLab @ UC Berkeley
-# Albert Li | alberthli@berkeley.edu
-
+"""
+Python-Bluetooth Interface for the Vacuum Hand Project
+Author: Albert Li <alberthli@berkeley.edu>
+"""
 import serial
 import time
 
 # Initializing the serial connection. The port name should be changed with every computer.
-baudrate = 57600
-port = '/dev/cu.VacuumHand-DevB' # Mac
-serialConnection = serial.Serial(port, baudrate, timeout = 1)
+COMM_TIME = 1.5
 
-class VacuumHand:
+# Offset from the zero position (for precise calibration)
+DEG_OFFSET = -2
 
-	def __init__(self):
-		pass
+class VacuumServo:
+	def __init__(self, baudrate=57600, port='/dev/rfcomm0', timeout=1.0):
+                self._serialConnection = serial.Serial(port, baudrate, timeout=timeout)
 
 	# Sends a command to move the servo to any position between -90 and 90 degrees, inclusive
 	def move(self, angle):
-		targetAngle = int(angle)
+		targetAngle = int(angle + DEG_OFFSET)
 
 		# Capping angle inputs
 		try:
-			if targetAngle > 84:
-				targetAngle = 84
+			if targetAngle > 90:
+				targetAngle = 90
 			elif targetAngle < -90:
 				targetAngle = -90
-			serialConnection.write(str(targetAngle).encode())
-
+			self._serialConnection.write(str(targetAngle).encode())
+                        time.sleep(COMM_TIME)
 		except TypeError:
 			print("Please input an integer in the range -90 to 90!")
 
@@ -57,9 +57,10 @@ class VacuumHand:
 
 		# Two-way acknowledge
 		print("Command Sent!")
-		serialConnection.readline()
+		self._serialConnection.readline()
 		print("Movement Successful!\n")
 
 # Initializing the hand and starting it
-v = VacuumHand()
-v.start()
+if __name__ == '__main__':
+        v = VacuumServo()
+        v.start()

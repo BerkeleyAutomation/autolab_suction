@@ -9,9 +9,6 @@ import logging
 import time
 import IPython
 
-# DEFAULT_CONFIG = "cfg/vacuum.yaml"
-
-
 class Vacuum:
     """
     Abstraction for Arduino vacuum suction. 
@@ -20,29 +17,29 @@ class Vacuum:
 
     def __init__(self):
         self._vacuum = VacuumSerialInterface(vacuum_comm="/dev/ttyUSB0", baudrate=115200)
-        print 'start robot'
         self._vacuum.start()
     
-    def vacuum_on(self):
-        self._vacuum.vacuum_on()
+    def on(self):
+        self._vacuum.on()
     
-    def vacuum_off(self):
-        self._vacuum.vacuum_off()
+    def off(self):
+        self._vacuum.off()
 
-    def vacuum_stop(self):
+    def stop(self):
+        time.sleep(1)
         self._vacuum.stop()
         
-def test_vacuum(sleep=5):
+def test_vacuum(sleep=10):
     vac = Vacuum()
 
     print 'suction on'
-    vac.vacuum_on()
+    vac.on()
     time.sleep(sleep)
     print 'suction off'
-    vac.vacuum_off()
+    vac.off()
     time.sleep(sleep-2)
     print 'stop robot'
-    vac.vacuum_stop()
+    vac.stop()
 
 if __name__ == '__main__':
     test_vacuum()

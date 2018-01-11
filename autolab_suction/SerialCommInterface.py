@@ -6,14 +6,13 @@ Arthor: Jason Liu <xinyuliu@berkeley.edu>
 from serial import Serial
 from multiprocessing import Process, Queue
 
-# import copy
-# import logging
-# import IPython
-# import numpy as np
 import time
 
+VACUUM_WARM_UP_TIME = 3 # time for the vacuum to warm up, in seconds
+
 class _VacuumSerial(Process):
-    # Private class that abstracts continuous serial communication with Arduino board
+    """ Private class that abstracts continuous serial communication with Arduino board.
+    """
     def __init__(self, flags_q, vacuum_comm, baudrate):
         Process.__init__(self)
         
@@ -30,7 +29,7 @@ class _VacuumSerial(Process):
     def run(self):
         self.ser = Serial(port=self._vacuum_comm, baudrate=self._baudrate)
         self._stop_robot()
-        time.sleep(3)
+        time.sleep(VACUUM_WARM_UP_TIME)
 
         while True:
             if not self._flags_q.empty():
@@ -38,20 +37,16 @@ class _VacuumSerial(Process):
                 self._flags[flag[0]] = flag[1]
 
             if self._flags["stopping"]:
-                print "stop"
-                # self._stop_robot()
                 self._flags_q.close()
                 self.ser.close()
                 break
 
             if self._flags["suction"]:
-                print "on"
                 self.ser.reset_input_buffer()
                 self.ser.reset_output_buffer()
                 self.ser.write("v")
 
             if not self._flags["suction"]:
-                print "off"
                 self.ser.reset_input_buffer()
                 self.ser.reset_output_buffer()
                 self.ser.write("x")
@@ -91,14 +86,14 @@ class VacuumSerialInterface:
 
     def start(self):
         self._dex_serial.start()
-        # time.sleep(3)
+        time.sleep(VACUUM_WARM_UP_TIME)
         
     def stop(self):
         self._flags_q.put(("stopping", True))
         self._reset()
 
-    def vacuum_on(self):
+    def on(self):
         self._flags_q.put(("suction", True))
         
-    def vacuum_off(self):
+    def off(self):
         self._flags_q.put(("suction", False))
